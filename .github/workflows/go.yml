@@ -9,7 +9,7 @@ on:
 jobs:
 
   build:
-    name: Build
+    name: Build linux64
     runs-on: ubuntu-latest
     steps:
 
@@ -30,7 +30,59 @@ jobs:
         fi
 
     - name: Build
-      run: go build -v .
+      run: go build -o ruijie_login main.go
+      
+    - name: Achieve
+      run: tar -czvf ${{ github.ref }}-linux64.tar.gz ./ruijie_login
 
-    - name: Test
-      run: go test -v .
+    - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./${{ github.ref }}-linux64.tar.gz
+          asset_name: ${{ github.ref }}-linux64.tar.gz
+    
+  build:
+    name: Build mips32
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+        git clone https://github.com/gomini/go-mips32.git 
+        cd go-mips32/src
+        ./make.bash
+
+    - name: Build
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=mips32le ./go-mips32/mips/go-mips32/bin/go build -o ruijie_login main.go
+      
+    - name: Achieve
+      run: tar -czvf ${{ github.ref }}-mips32.tar.gz ./ruijie_login
+
+    - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./${{ github.ref }}-mips32.tar.gz
+          asset_name: ${{ github.ref }}-mips32.tar.gz
