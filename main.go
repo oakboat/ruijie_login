@@ -40,8 +40,8 @@ func main() {
         Usage()
         return
 	}
-	account := args[1]
-	passwd := args[2]
+	// account := args[1]
+	// passwd := args[2]
 	if NetStatus() {
 		fmt.Println("你已连接网络,无需登录")
 	}else{
@@ -50,7 +50,7 @@ func main() {
 			fmt.Println(err)
 		}
 		defer response.Body.Close()
-		body,err := ioutil.ReadAll(response.Body)
+		body, _ := ioutil.ReadAll(response.Body)
 		fmt.Println(string(body))
 	}
 }
