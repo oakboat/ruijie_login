@@ -33,18 +33,16 @@ jobs:
       run: go build -o ruijie_login main.go
       
     - name: Achieve
-      run: tar -czvf ${{ github.ref }}-linux64.tar.gz ./ruijie_login
+      run: tar -czvf rj.tar.gz ./ruijie_login
 
     - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v1-release
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ github.ref }}-linux64.tar.gz
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./rj.tar.gz
           asset_name: ${{ github.ref }}-linux64.tar.gz
+          tag: ${{ github.ref }}
     
   build:
     name: Build mips32
@@ -74,15 +72,13 @@ jobs:
       run: CGO_ENABLED=0 GOOS=linux GOARCH=mips32le ./go-mips32/mips/go-mips32/bin/go build -o ruijie_login main.go
       
     - name: Achieve
-      run: tar -czvf ${{ github.ref }}-mips32.tar.gz ./ruijie_login
+      run: tar -czvf rj.tar.gz ./ruijie_login
 
     - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: svenstaro/upload-release-action@v1-release
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./${{ github.ref }}-mips32.tar.gz
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./rj.tar.gz
           asset_name: ${{ github.ref }}-mips32.tar.gz
+          tag: ${{ github.ref }}
